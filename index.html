@@ -415,8 +415,18 @@
         .content-grid {
             display: grid;
             grid-template-columns: 1fr 420px;
-            gap: 32px;
+            grid-template-areas:
+                "tabs position"
+                "stats position"
+                "chart about";
+            gap: 24px;
         }
+        
+        .card-tabs { grid-area: tabs; }
+        .card-stats { grid-area: stats; }
+        .card-chart { grid-area: chart; }
+        .card-position { grid-area: position; }
+        .card-about { grid-area: about; }
 
         /* Tabs */
         .tabs-header {
@@ -733,7 +743,15 @@
 
         /* Responsive */
         @media (max-width: 1200px) {
-            .content-grid { grid-template-columns: 1fr; }
+            .content-grid { 
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "tabs"
+                    "position"
+                    "chart"
+                    "stats"
+                    "about";
+            }
         }
 
         @media (max-width: 900px) {
@@ -763,6 +781,7 @@
             </div>
         </div>
         <div class="header-right">
+            <button id="ownerPauseBtn" class="btn-secondary" style="padding: 8px 12px; font-size: 12px; display: none; background: #ef4444; border-color: #ef4444;" title="Pause/Unpause Contract">⏸️ Pause</button>
             <button id="refreshPriceBtn" class="btn-secondary" style="padding: 8px 12px; font-size: 12px;" title="Update Pyth Oracle Price">🔮 Refresh Price</button>
             <div id="walletArea">
                 <button id="connectBtn" class="btn-primary" style="padding: 12px 24px; width: auto;">Connect Wallet</button>
@@ -833,180 +852,210 @@
                 <div class="advisor-right">
                     <p class="advisor-desc" id="exitDesc">Contract rate is optimal</p>
                     <p class="advisor-note" id="exitNote" style="color: #22c55e;">4% fee</p>
-
+                    <p class="advisor-disclaimer" id="exitDisclaimer" style="display: none;">*Slippage may apply for large orders</p>
                 </div>
             </div>
         </div>
 
         <!-- Main Content Grid -->
         <div class="content-grid">
-            <!-- Left Column -->
-            <div>
-                <!-- Tabs Card -->
-                <div class="card" style="margin-bottom: 24px;">
-                    <div class="tabs-header">
-                        <button class="tab-btn active" data-tab="mint">Mint ggg2</button>
-                        <button class="tab-btn" data-tab="redeem">Redeem</button>
-                        <button class="tab-btn" data-tab="swap">Uniswap</button>
-                    </div>
-
-                    <!-- Mint Tab -->
-                    <div class="tab-content active" id="tab-mint">
-                        <div class="input-group">
-                            <label class="input-label">USDC Amount</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="mintInput" class="input-field" placeholder="0.00">
-                                <button class="max-btn" id="mintMaxBtn">MAX</button>
-                            </div>
-                            <p class="input-balance">Balance: <span id="usdcBalance">0.00</span> USDC</p>
-                        </div>
-                        <div class="estimate-box">
-                            <div class="estimate-row">
-                                <span class="estimate-label">You'll receive</span>
-                                <span class="estimate-value" id="mintEstimate">~0 ggg2</span>
-                            </div>
-                            <div class="estimate-row">
-                                <span class="estimate-label">Avg Price</span>
-                                <span class="estimate-value" id="mintAvgPrice">$--/ggg2</span>
-                            </div>
-                            <div class="estimate-row">
-                                <span class="estimate-label">Fee</span>
-                                <span class="estimate-value">4%</span>
-                            </div>
-                        </div>
-                        <button id="mintBtn" class="btn-primary" disabled>Connect Wallet</button>
-                    </div>
-
-                    <!-- Redeem Tab -->
-                    <div class="tab-content" id="tab-redeem">
-                        <div class="input-group">
-                            <label class="input-label">ggg2 Amount</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="redeemInput" class="input-field" placeholder="0.00">
-                                <button class="max-btn" id="redeemMaxBtn">MAX</button>
-                            </div>
-                            <p class="input-balance">Balance: <span id="upagBalance">0.00</span> ggg2</p>
-                        </div>
-                        <div id="earlyFeeWarning" style="display: none; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;">
-                            <p style="margin: 0 0 8px; font-weight: 600; color: #ef4444; font-size: 14px;">⚠️ Early redemption fee applies</p>
-                            <p style="margin: 0; font-size: 12px; color: rgba(239,68,68,0.8);" id="earlyFeeText"></p>
-                        </div>
-                        <div class="estimate-box">
-                            <div class="estimate-row">
-                                <span class="estimate-label">You'll receive</span>
-                                <span class="estimate-value green" id="redeemEstimate">~$0 USDC</span>
-                            </div>
-                            <div class="estimate-row">
-                                <span class="estimate-label">Avg Price</span>
-                                <span class="estimate-value" id="redeemAvgPrice">$--/ggg2</span>
-                            </div>
-                            <div class="estimate-row">
-                                <span class="estimate-label">Fee</span>
-                                <span class="estimate-value">4%</span>
-                            </div>
-                        </div>
-                        <button id="redeemBtn" class="btn-primary" disabled>Connect Wallet</button>
-                    </div>
-
-                    <!-- Swap Tab -->
-                    <div class="tab-content" id="tab-swap">
-                        <div class="uniswap-box">
-                            <div class="uniswap-icon">🦄</div>
-                            <h3 class="uniswap-title">Trade on Uniswap</h3>
-                            <p class="uniswap-desc">Buy or sell ggg2 on the open market</p>
-                            <div class="estimate-box" style="text-align: left; margin-bottom: 16px;">
-                                <div class="estimate-row">
-                                    <span class="estimate-label">Uniswap Price</span>
-                                    <span class="estimate-value" id="swapDexPrice">$--</span>
-                                </div>
-                                <div class="estimate-row">
-                                    <span class="estimate-label">vs Contract</span>
-                                    <span class="estimate-value" id="swapVsContract">--%</span>
-                                </div>
-                                <div class="estimate-row">
-                                    <span class="estimate-label">Route</span>
-                                    <span class="estimate-value" style="font-size: 12px;">ggg2 ↔ USDC</span>
-                                </div>
-                            </div>
-                            <a href="https://app.uniswap.org/swap?inputCurrency=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913&outputCurrency=0x5Df178cf5A1AdaF70c40E0397787750881bD871A&chain=base" target="_blank" style="text-decoration: none;">
-                                <button class="btn-primary uniswap-btn">Open Uniswap ↗</button>
-                            </a>
-                        </div>
-                    </div>
+            <!-- Tabs Card -->
+            <div class="card card-tabs">
+                <div class="tabs-header">
+                    <button class="tab-btn active" data-tab="mint">Mint ggg2</button>
+                    <button class="tab-btn" data-tab="redeem">Redeem</button>
+                    <button class="tab-btn" data-tab="swap">Uniswap</button>
                 </div>
 
-                <!-- Protocol Stats -->
-                <div class="card" style="padding: 24px;">
-                    <h3 class="section-title">PROTOCOL STATS</h3>
-                    <div class="protocol-stats">
-                        <div>
-                            <p class="protocol-stat-label">Total Backing</p>
-                            <p class="protocol-stat-value" id="totalBacking">$0</p>
+                <!-- Mint Tab -->
+                <div class="tab-content active" id="tab-mint">
+                    <div class="input-group">
+                        <label class="input-label">USDC Amount</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="mintInput" class="input-field" placeholder="0.00">
+                            <button class="max-btn" id="mintMaxBtn">MAX</button>
                         </div>
-                        <div>
-                            <p class="protocol-stat-label">Total Supply</p>
-                            <p class="protocol-stat-value" id="totalSupply">0 ggg2</p>
+                        <p class="input-balance">Balance: <span id="usdcBalance">0.00</span> USDC</p>
+                    </div>
+                    <div class="estimate-box">
+                        <div class="estimate-row">
+                            <span class="estimate-label">You'll receive</span>
+                            <span class="estimate-value" id="mintEstimate">~0 ggg2</span>
                         </div>
-                        <div>
-                            <p class="protocol-stat-label">Total Minters</p>
-                            <p class="protocol-stat-value" id="totalHolders">0</p>
+                        <div class="estimate-row">
+                            <span class="estimate-label">Avg Price</span>
+                            <span class="estimate-value" id="mintAvgPrice">$--/ggg2</span>
                         </div>
-                        <div>
-                            <p class="protocol-stat-label">Supply in Liquidity</p>
-                            <p class="protocol-stat-value" id="lpPoolPercent">0%</p>
+                        <div class="estimate-row">
+                            <span class="estimate-label">Fee</span>
+                            <span class="estimate-value">4%</span>
                         </div>
+                    </div>
+                    <button id="mintBtn" class="btn-primary" disabled>Connect Wallet</button>
+                </div>
+
+                <!-- Redeem Tab -->
+                <div class="tab-content" id="tab-redeem">
+                    <div class="input-group">
+                        <label class="input-label">ggg2 Amount</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="redeemInput" class="input-field" placeholder="0.00">
+                            <button class="max-btn" id="redeemMaxBtn">MAX</button>
+                        </div>
+                        <p class="input-balance">Balance: <span id="upagBalance">0.00</span> ggg2</p>
+                    </div>
+                    <div id="earlyFeeWarning" style="display: none; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;">
+                        <p style="margin: 0 0 8px; font-weight: 600; color: #ef4444; font-size: 14px;">⚠️ Early redemption fee applies</p>
+                        <p style="margin: 0; font-size: 12px; color: rgba(239,68,68,0.8);" id="earlyFeeText"></p>
+                    </div>
+                    <div class="estimate-box">
+                        <div class="estimate-row">
+                            <span class="estimate-label">You'll receive</span>
+                            <span class="estimate-value green" id="redeemEstimate">~$0 USDC</span>
+                        </div>
+                        <div class="estimate-row">
+                            <span class="estimate-label">Avg Price</span>
+                            <span class="estimate-value" id="redeemAvgPrice">$--/ggg2</span>
+                        </div>
+                        <div class="estimate-row">
+                            <span class="estimate-label">Fee</span>
+                            <span class="estimate-value">4%</span>
+                        </div>
+                    </div>
+                    <button id="redeemBtn" class="btn-primary" disabled>Connect Wallet</button>
+                </div>
+
+                <!-- Swap Tab -->
+                <div class="tab-content" id="tab-swap">
+                    <div class="uniswap-box">
+                        <div class="uniswap-icon">🦄</div>
+                        <h3 class="uniswap-title">Trade on Uniswap</h3>
+                        <p class="uniswap-desc">Buy or sell ggg2 on the open market</p>
+                        <div class="estimate-box" style="text-align: left; margin-bottom: 16px;">
+                            <div class="estimate-row">
+                                <span class="estimate-label">Uniswap Price</span>
+                                <span class="estimate-value" id="swapDexPrice">$--</span>
+                            </div>
+                            <div class="estimate-row">
+                                <span class="estimate-label">vs Contract</span>
+                                <span class="estimate-value" id="swapVsContract">--%</span>
+                            </div>
+                            <div class="estimate-row">
+                                <span class="estimate-label">Route</span>
+                                <span class="estimate-value" style="font-size: 12px;">ggg2 ↔ USDC</span>
+                            </div>
+                        </div>
+                        <a href="https://app.uniswap.org/swap?inputCurrency=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913&outputCurrency=0x5Df178cf5A1AdaF70c40E0397787750881bD871A&chain=base" target="_blank" style="text-decoration: none;">
+                            <button class="btn-primary uniswap-btn">Open Uniswap ↗</button>
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column -->
-            <div>
-                <!-- Position Card -->
-                <div class="card position-card" style="padding: 24px;">
-                    <h3 class="section-title">YOUR POSITION</h3>
-                    
-                    <div id="positionConnected" style="display: none;">
-                        <div class="position-balance">
-                            <p class="stat-value-lg silver-text" id="userBalance">0.00 ggg2</p>
-                            <div class="position-value">
-                                <span id="userValue">$0.00</span>
-                            </div>
-                        </div>
-                        <div class="divider"></div>
-                        <div id="bagsSection">
-                            <p class="bags-title">YOUR POSITION</p>
-                            <div id="bagsList"></div>
-                            <div class="total-redeemable" id="totalRedeemable" style="display: none;">
-                                <span class="label">Total Redeemable Now</span>
-                                <span class="value" id="totalRedeemableValue">$0.00</span>
-                            </div>
+            <!-- Protocol Stats -->
+            <div class="card card-stats" style="padding: 24px;">
+                <h3 class="section-title">PROTOCOL STATS</h3>
+                <div class="protocol-stats">
+                    <div>
+                        <p class="protocol-stat-label">Total Backing</p>
+                        <p class="protocol-stat-value" id="totalBacking">$0</p>
+                    </div>
+                    <div>
+                        <p class="protocol-stat-label">Total Supply</p>
+                        <p class="protocol-stat-value" id="totalSupply">0 ggg2</p>
+                    </div>
+                    <div>
+                        <p class="protocol-stat-label">Total Minters</p>
+                        <p class="protocol-stat-value" id="totalHolders">0</p>
+                    </div>
+                    <div>
+                        <p class="protocol-stat-label">Supply in Liquidity</p>
+                        <p class="protocol-stat-value" id="lpPoolPercent">0%</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Price Comparison Chart -->
+            <div class="card card-chart" style="padding: 24px;">
+                <h3 class="section-title">PRICE COMPARISON</h3>
+                <div id="priceChart" style="display: flex; align-items: flex-end; justify-content: space-around; height: 120px; margin-top: 16px; padding: 0 10px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                        <div id="barSpot" style="width: 36px; background: linear-gradient(180deg, #c0c0c0 0%, #808080 100%); border-radius: 4px 4px 0 0; transition: height 0.5s;"></div>
+                        <p style="font-size: 10px; color: rgba(192,192,192,0.7); margin-top: 8px;">Spot</p>
+                        <p style="font-size: 12px; font-weight: 600; color: #c0c0c0;" id="chartSpotPrice">$0</p>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                        <div id="barRedeem" style="width: 36px; background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); border-radius: 4px 4px 0 0; transition: height 0.5s;"></div>
+                        <p style="font-size: 10px; color: rgba(192,192,192,0.7); margin-top: 8px;">Redeem</p>
+                        <p style="font-size: 12px; font-weight: 600; color: #f59e0b;" id="chartRedeemPrice">$0</p>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                        <div id="barBlend" style="width: 36px; background: linear-gradient(180deg, #a855f7 0%, #7c3aed 100%); border-radius: 4px 4px 0 0; transition: height 0.5s;"></div>
+                        <p style="font-size: 10px; color: rgba(192,192,192,0.7); margin-top: 8px;">Uniswap</p>
+                        <p style="font-size: 12px; font-weight: 600; color: #a855f7;" id="chartBlendPrice">$0</p>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                        <div id="barContract" style="width: 36px; background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%); border-radius: 4px 4px 0 0; transition: height 0.5s;"></div>
+                        <p style="font-size: 10px; color: rgba(192,192,192,0.7); margin-top: 8px;">Contract</p>
+                        <p style="font-size: 12px; font-weight: 600; color: #22c55e;" id="chartContractPrice">$0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Position Card -->
+            <div class="card card-position position-card" style="padding: 24px;">
+                <h3 class="section-title">YOUR POSITION</h3>
+                
+                <div id="positionConnected" style="display: none;">
+                    <div class="position-balance">
+                        <p class="stat-value-lg silver-text" id="userBalance">0.00 ggg2</p>
+                        <div class="position-value">
+                            <span id="userValue">$0.00</span>
                         </div>
                     </div>
-
-                    <div id="positionDisconnected" class="connect-prompt">
-                        <div class="icon">🥈</div>
-                        <p>Connect wallet to view your silver bags</p>
-                        <button class="btn-primary" onclick="connectWallet()">Connect Wallet</button>
+                    <div class="divider"></div>
+                    <div id="bagsSection">
+                        <p class="bags-title">YOUR POSITION</p>
+                        <div id="bagsList"></div>
+                        <div class="total-redeemable" id="totalRedeemable" style="display: none;">
+                            <span class="label">Total Redeemable Now</span>
+                            <span class="value" id="totalRedeemableValue">$0.00</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- About Card -->
-                <div class="card" style="padding: 24px;">
-                    <h3 class="section-title">ABOUT UPSILVER</h3>
-                    <p class="about-text">
-                        ggg2 is <span class="highlight">100% USDC-backed</span> silver exposure with 
-                        <span class="green">up-only tokenomics</span>. 
-                        The UpSilver Ratio only increases as fees accumulate. 
-                        <span class="highlight">4% fee on mint and redeem.</span>
+                <div id="positionDisconnected" class="connect-prompt">
+                    <div class="icon">🥈</div>
+                    <p>Connect wallet to view your silver bags</p>
+                    <button class="btn-primary" onclick="connectWallet()">Connect Wallet</button>
+                </div>
+            </div>
+
+            <!-- About Card -->
+            <div class="card card-about" style="padding: 24px;">
+                <h3 class="section-title">ABOUT UPSILVER</h3>
+                <p class="about-text">
+                    ggg2 is <span class="highlight">100% USDC-backed</span> silver exposure with 
+                    <span class="green">up-only tokenomics</span>. 
+                    The UpSilver Ratio only increases as fees accumulate. 
+                    <span class="highlight">4% fee on mint and redeem.</span>
+                </p>
+                <div class="about-blend" style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); border-radius: 10px; padding: 16px; margin: 16px 0;">
+                    <p style="margin: 0 0 8px; font-weight: 600; color: #f59e0b; font-size: 14px;">📊 How Redemption Pricing Works</p>
+                    <p style="margin: 0; font-size: 13px; color: rgba(192,192,192,0.9); line-height: 1.5;">
+                        <strong>Mint:</strong> Always at silver spot price.<br>
+                        <strong>Redeem:</strong> You receive the <em>lower</em> of silver spot or contract price.<br><br>
+                        <span style="color: rgba(192,192,192,0.7);">When contract price > spot (premium exists): redemption pays spot price — the premium stays in the pool, benefiting long-term holders.<br>
+                        When spot > contract price: redemption pays contract price — protecting the backing ratio.</span>
                     </p>
-                    <p class="about-pyth">
-                        🔮 Powered by <span class="purple">Pyth Network</span> — institutional-grade silver spot prices, 
-                        updated in real-time with sub-second precision.
-                    </p>
-                    <div class="about-buttons">
-                        <a href="https://upsilver.gitbook.io/docs" target="_blank" class="btn-secondary">Docs</a>
-                        <a href="https://basescan.org/address/0x5Df178cf5A1AdaF70c40E0397787750881bD871A#code" target="_blank" class="btn-secondary">Contract</a>
-                    </div>
+                </div>
+                <p class="about-pyth">
+                    🔮 Powered by <span class="purple">Pyth Network</span> — institutional-grade silver spot prices, 
+                    updated in real-time with sub-second precision.
+                </p>
+                <div class="about-buttons">
+                    <a href="https://upsilver.gitbook.io/docs" target="_blank" class="btn-secondary">Docs</a>
+                    <a href="https://basescan.org/address/0x5Df178cf5A1AdaF70c40E0397787750881bD871A#code" target="_blank" class="btn-secondary">Contract</a>
                 </div>
             </div>
         </div>
@@ -1193,6 +1242,35 @@
                 "outputs": [],
                 "stateMutability": "payable",
                 "type": "function"
+            },
+            // Owner functions
+            {
+                "inputs": [],
+                "name": "owner",
+                "outputs": [{"name": "", "type": "address"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "paused",
+                "outputs": [{"name": "", "type": "bool"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "pause",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "unpause",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
             }
         ];
 
@@ -1236,6 +1314,8 @@
         let upsilverContract = null;
         let usdcContract = null;
         let isLoading = false;
+        let contractOwner = null;
+        let isPaused = false;
 
         // Data
         let silverPrice = 0;
@@ -1467,10 +1547,12 @@
                 }
 
                 // Fetch basic data that doesn't need oracle
-                const [totalBackingRaw, totalSupplyRaw, totalUsersRaw] = await Promise.all([
+                const [totalBackingRaw, totalSupplyRaw, totalUsersRaw, ownerAddress, pausedStatus] = await Promise.all([
                     contract.methods.totalBacking().call(),
                     contract.methods.totalSupply().call(),
-                    contract.methods.totalUsers().call()
+                    contract.methods.totalUsers().call(),
+                    contract.methods.owner().call(),
+                    contract.methods.paused().call()
                 ]);
 
                 console.log('Raw values - totalBacking:', totalBackingRaw, 'totalSupply:', totalSupplyRaw, 'totalUsers:', totalUsersRaw);
@@ -1479,6 +1561,11 @@
                 totalBacking = parseFloat(totalBackingRaw) / 1e6;
                 totalSupplyVal = parseFloat(totalSupplyRaw) / 1e18;
                 totalHolders = parseInt(totalUsersRaw);
+                contractOwner = ownerAddress.toLowerCase();
+                isPaused = pausedStatus;
+                
+                // Update owner pause button visibility
+                updateOwnerControls();
                 
                 console.log('Parsed values - totalBacking:', totalBacking, 'totalSupply:', totalSupplyVal, 'holders:', totalHolders);
 
@@ -1520,6 +1607,7 @@
                 // Update UI
                 updatePriceDisplay();
                 updateProtocolStats();
+                updatePriceChart();
                 updateAdvisors();
                 
                 // Show stale warning if needed
@@ -1582,6 +1670,26 @@
             }
         }
 
+        function updateOwnerControls() {
+            const pauseBtn = document.getElementById('ownerPauseBtn');
+            const isOwner = userAccount && contractOwner && userAccount.toLowerCase() === contractOwner;
+            
+            if (isOwner) {
+                pauseBtn.style.display = 'block';
+                if (isPaused) {
+                    pauseBtn.textContent = '▶️ Unpause';
+                    pauseBtn.style.background = '#22c55e';
+                    pauseBtn.style.borderColor = '#22c55e';
+                } else {
+                    pauseBtn.textContent = '⏸️ Pause';
+                    pauseBtn.style.background = '#ef4444';
+                    pauseBtn.style.borderColor = '#ef4444';
+                }
+            } else {
+                pauseBtn.style.display = 'none';
+            }
+        }
+
         function updateProtocolStats() {
             document.getElementById('totalBacking').textContent = '$' + totalBacking.toLocaleString(undefined, {maximumFractionDigits: 0});
             document.getElementById('totalSupply').textContent = totalSupplyVal.toLocaleString(undefined, {maximumFractionDigits: 2}) + ' ggg2';
@@ -1592,19 +1700,61 @@
             document.getElementById('lpPoolPercent').textContent = lpPercent.toFixed(1) + '%';
         }
 
-        function updateAdvisors() {
-            const dexVsContract = dexPrice > 0 ? ((dexPrice - contractPrice) / contractPrice * 100) : 0;
-            const dexCheaper = dexPrice > 0 && dexPrice < contractPrice;
+        function updatePriceChart() {
+            // Get the four prices
+            const spot = silverPrice || 0;
+            const redeem = Math.min(contractPrice, silverPrice) || 0; // Asymmetric blend - capped at spot
+            const uniswap = dexPrice || 0;
+            const contract = contractPrice || 0;
+            
+            // Find max for scaling
+            const maxPrice = Math.max(spot, redeem, uniswap, contract, 1);
+            const maxHeight = 80; // max bar height in px
+            
+            // Calculate bar heights (minimum 5px for visibility)
+            const spotHeight = Math.max(5, (spot / maxPrice) * maxHeight);
+            const redeemHeight = Math.max(5, (redeem / maxPrice) * maxHeight);
+            const uniswapHeight = uniswap > 0 ? Math.max(5, (uniswap / maxPrice) * maxHeight) : 0;
+            const contractHeight = Math.max(5, (contract / maxPrice) * maxHeight);
+            
+            // Update bars
+            document.getElementById('barSpot').style.height = spotHeight + 'px';
+            document.getElementById('barRedeem').style.height = redeemHeight + 'px';
+            document.getElementById('barBlend').style.height = uniswapHeight + 'px';
+            document.getElementById('barContract').style.height = contractHeight + 'px';
+            
+            // Update labels
+            document.getElementById('chartSpotPrice').textContent = '$' + spot.toFixed(2);
+            document.getElementById('chartRedeemPrice').textContent = '$' + redeem.toFixed(2);
+            document.getElementById('chartBlendPrice').textContent = uniswap > 0 ? '$' + uniswap.toFixed(2) : 'N/A';
+            document.getElementById('chartContractPrice').textContent = '$' + contract.toFixed(2);
+        }
 
-            // Entry advisor - only recommend Uniswap if pool exists and is cheaper
+        function updateAdvisors() {
+            // For BUYING: Compare mint price (silver + 4% fee) vs DEX price
+            // Mint gives you tokens at: silverPrice * 1.0417 (accounting for 4% fee taking tokens)
+            const effectiveMintPrice = silverPrice / 0.96; // Price per token when minting
+            const mintVsDex = dexPrice > 0 ? ((dexPrice - effectiveMintPrice) / effectiveMintPrice * 100) : 0;
+            const mintIsBetter = dexPrice > 0 && effectiveMintPrice < dexPrice;
+
+            // Entry advisor
             let entryAction, entryIcon, entryColor, entryDesc, entryNote, showEntryDisclaimer;
-            if (dexPrice > 0 && dexCheaper && Math.abs(dexVsContract) > 1) {
+            if (dexPrice > 0 && !mintIsBetter && Math.abs(mintVsDex) > 1) {
+                // DEX is cheaper than minting
                 entryAction = "Buy on Uniswap";
                 entryIcon = "🦄";
                 entryColor = "#a855f7";
-                entryDesc = "DEX price is below contract rate";
-                entryNote = "Save " + Math.abs(dexVsContract).toFixed(1) + "% vs minting";
+                entryDesc = "DEX price is below mint rate";
+                entryNote = "Save " + Math.abs(mintVsDex).toFixed(1) + "% vs minting";
                 showEntryDisclaimer = true;
+            } else if (dexPrice > 0 && mintIsBetter && Math.abs(mintVsDex) > 1) {
+                // Minting is cheaper than DEX
+                entryAction = "Mint Direct";
+                entryIcon = "🥈";
+                entryColor = "#22c55e";
+                entryDesc = "Minting beats DEX price";
+                entryNote = "Save " + Math.abs(mintVsDex).toFixed(1) + "% vs Uniswap";
+                showEntryDisclaimer = false;
             } else {
                 entryAction = "Mint Direct";
                 entryIcon = "🥈";
@@ -1623,21 +1773,34 @@
             document.getElementById('entryNote').style.color = entryColor;
             document.getElementById('entryDisclaimer').style.display = showEntryDisclaimer ? 'block' : 'none';
 
-            // Exit advisor - only recommend Uniswap if pool exists and is better
-            const dexBetterForSell = dexPrice > 0 && dexPrice > contractPrice * 0.97;
+            // For SELLING: Compare redeem value vs DEX price
+            // When contract has premium (contractPrice > silverPrice), redemption is capped at silverPrice
+            // effectiveRedeemPrice = min(contractPrice, silverPrice) * 0.96
+            const redeemBasePrice = Math.min(contractPrice, silverPrice);
+            const effectiveRedeemPrice = redeemBasePrice * 0.96; // What you get per token after fee
+            const redeemVsDex = dexPrice > 0 ? ((dexPrice - effectiveRedeemPrice) / effectiveRedeemPrice * 100) : 0;
+            const dexBetterForSell = dexPrice > 0 && dexPrice > effectiveRedeemPrice;
+            
             let exitAction, exitIcon, exitColor, exitDesc, exitNote, showExitDisclaimer;
-            if (dexPrice > 0 && dexBetterForSell && dexVsContract > 2) {
+            if (dexPrice > 0 && dexBetterForSell && redeemVsDex > 2) {
                 exitAction = "Sell on Uniswap";
                 exitIcon = "🦄";
                 exitColor = "#a855f7";
                 exitDesc = "DEX price beats redemption";
-                exitNote = "+" + Math.abs(dexVsContract).toFixed(1) + "% vs redeem";
+                exitNote = "+" + redeemVsDex.toFixed(1) + "% vs redeem";
                 showExitDisclaimer = true;
-            } else {
+            } else if (dexPrice > 0 && !dexBetterForSell && Math.abs(redeemVsDex) > 2) {
                 exitAction = "Redeem Direct";
                 exitIcon = "💵";
                 exitColor = "#22c55e";
-                exitDesc = "Contract rate is optimal";
+                exitDesc = "Redemption beats DEX price";
+                exitNote = "+" + Math.abs(redeemVsDex).toFixed(1) + "% vs Uniswap";
+                showExitDisclaimer = false;
+            } else {
+                exitAction = "Redeem Direct";
+                exitIcon = "💵";
+                exitColor = "#c0c0c0";
+                exitDesc = "Prices aligned";
                 exitNote = "4% fee";
                 showExitDisclaimer = false;
             }
@@ -1649,18 +1812,35 @@
             document.getElementById('exitDesc').textContent = exitDesc;
             document.getElementById('exitNote').textContent = exitNote;
             document.getElementById('exitNote').style.color = exitColor;
+            document.getElementById('exitDisclaimer').style.display = showExitDisclaimer ? 'block' : 'none';
         }
 
-        function updateUserDisplay() {
+        async function updateUserDisplay() {
             document.getElementById('usdcBalance').textContent = userUsdcBalance.toFixed(2);
             document.getElementById('upagBalance').textContent = userBalance.toFixed(4);
             document.getElementById('userBalance').textContent = userBalance.toFixed(4) + ' ggg2';
             document.getElementById('userValue').textContent = '$' + (userBalance * contractPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-            // Simple position summary
+            // Simple position summary - get actual redeem value from contract
             const bagsList = document.getElementById('bagsList');
             if (userBalance > 0) {
-                const redeemValue = userBalance * contractPrice * 0.96; // 4% fee
+                let redeemValue = userBalance * contractPrice * 0.96; // Fallback
+                
+                // Try to get actual value from contract
+                try {
+                    let contract = upsilverContract;
+                    let w3 = web3;
+                    if (!contract) {
+                        w3 = new Web3(RPC_ENDPOINTS[currentRpcIndex]);
+                        contract = new w3.eth.Contract(UPSILVER_ABI, UPSILVER_ADDRESS);
+                    }
+                    const amountWei = w3.utils.toWei(userBalance.toString(), 'ether');
+                    const result = await contract.methods.estimateRedeem(amountWei).call();
+                    redeemValue = parseFloat(result.usdcOut) / 1e6;
+                } catch (e) {
+                    console.log('Could not get estimate from contract:', e.message);
+                }
+                
                 bagsList.innerHTML = `
                     <div class="bag-card">
                         <div class="bag-header">
@@ -1683,21 +1863,29 @@
 
         async function updateMintEstimate() {
             const amount = parseFloat(mintInput.value) || 0;
-            if (amount <= 0 || !upsilverContract) {
+            if (amount <= 0) {
                 document.getElementById('mintEstimate').textContent = '~0 ggg2';
                 document.getElementById('mintAvgPrice').textContent = '$--/ggg2';
                 return;
             }
             
             try {
+                // Use connected contract or create read-only one
+                let contract = upsilverContract;
+                if (!contract) {
+                    const provider = new Web3(RPC_ENDPOINTS[currentRpcIndex]);
+                    contract = new provider.eth.Contract(UPSILVER_ABI, UPSILVER_ADDRESS);
+                }
+                
                 const amountWei = Math.floor(amount * 1e6).toString(); // USDC 6 decimals
-                const result = await upsilverContract.methods.estimateMint(amountWei).call();
+                const result = await contract.methods.estimateMint(amountWei).call();
                 const tokensOut = parseFloat(result.tokensOut) / 1e18;
-                const effectivePrice = parseFloat(result.effectivePrice) / 1e18;
+                const avgPrice = tokensOut > 0 ? amount / tokensOut : 0;
                 
                 document.getElementById('mintEstimate').textContent = '~' + tokensOut.toFixed(4) + ' ggg2';
-                document.getElementById('mintAvgPrice').textContent = '$' + effectivePrice.toFixed(2) + '/ggg2';
+                document.getElementById('mintAvgPrice').textContent = avgPrice > 0 ? '$' + avgPrice.toFixed(2) + '/ggg2' : '$--/ggg2';
             } catch (e) {
+                console.log('Mint estimate error:', e);
                 // Fallback to local calculation
                 const tokens = silverPrice > 0 ? (amount * 0.96 / silverPrice) : 0;
                 const avgPrice = tokens > 0 ? amount / tokens : 0;
@@ -1708,21 +1896,30 @@
 
         async function updateRedeemEstimate() {
             const amount = parseFloat(redeemInput.value) || 0;
-            if (amount <= 0 || !upsilverContract) {
+            if (amount <= 0) {
                 document.getElementById('redeemEstimate').textContent = '~$0 USDC';
                 document.getElementById('redeemAvgPrice').textContent = '$--/ggg2';
                 return;
             }
             
             try {
-                const amountWei = web3 ? web3.utils.toWei(amount.toString(), 'ether') : (amount * 1e18).toString();
-                const result = await upsilverContract.methods.estimateRedeem(amountWei).call();
+                // Use connected contract or create read-only one
+                let contract = upsilverContract;
+                let w3 = web3;
+                if (!contract) {
+                    w3 = new Web3(RPC_ENDPOINTS[currentRpcIndex]);
+                    contract = new w3.eth.Contract(UPSILVER_ABI, UPSILVER_ADDRESS);
+                }
+                
+                const amountWei = w3.utils.toWei(amount.toString(), 'ether');
+                const result = await contract.methods.estimateRedeem(amountWei).call();
                 const usdcOut = parseFloat(result.usdcOut) / 1e6;
                 const avgPrice = amount > 0 ? usdcOut / amount : 0;
                 
                 document.getElementById('redeemEstimate').textContent = '~$' + usdcOut.toFixed(2) + ' USDC';
                 document.getElementById('redeemAvgPrice').textContent = '$' + avgPrice.toFixed(2) + '/ggg2';
             } catch (e) {
+                console.log('Redeem estimate error:', e);
                 // Fallback to local calculation
                 const usdc = contractPrice > 0 ? (amount * contractPrice * 0.96) : 0;
                 const avgPrice = amount > 0 ? usdc / amount : 0;
@@ -1935,6 +2132,39 @@
 
         // Add refresh price button listener
         document.getElementById('refreshPriceBtn').addEventListener('click', updatePythPrice);
+        
+        // Add owner pause button listener
+        document.getElementById('ownerPauseBtn').addEventListener('click', async () => {
+            if (!userAccount || !upsilverContract || isLoading) return;
+            
+            const isOwner = userAccount.toLowerCase() === contractOwner;
+            if (!isOwner) return;
+            
+            try {
+                isLoading = true;
+                const pauseBtn = document.getElementById('ownerPauseBtn');
+                pauseBtn.disabled = true;
+                
+                if (isPaused) {
+                    showStatus('Unpausing contract...', false, true);
+                    await upsilverContract.methods.unpause().send({ from: userAccount });
+                    showStatus('Contract unpaused! ✅', false);
+                } else {
+                    showStatus('Pausing contract...', false, true);
+                    await upsilverContract.methods.pause().send({ from: userAccount });
+                    showStatus('Contract paused! ⏸️', false);
+                }
+                
+                await loadContractData();
+                setTimeout(hideStatus, 3000);
+            } catch (error) {
+                console.error('Pause error:', error);
+                showStatus(error.message || 'Pause failed', true);
+            } finally {
+                isLoading = false;
+                document.getElementById('ownerPauseBtn').disabled = false;
+            }
+        });
     </script>
 </body>
 </html>
